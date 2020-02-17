@@ -1,21 +1,21 @@
-load Trials-RRI/Trial1RRI
-load Trials-RRI/Trial2RRI
-load Trials-RRI/Trial3RRI
+load RRI_Vaikkun
+%%
 
-Ts1 = 1/fsRRI ; Ts2 = 1/fsRRI2; Ts3 = 1/fsRRI3; Fs = fsRRI ; % sampling frequency for all RRI are same
-n1=length(xRRI);n2=length(xRRI2);n3=length(xRRI3);  numRRI = 3;
-t1=0:Ts1:(n1-1)*Ts1 ; t2=0:Ts2:(n2-1)*Ts2 ; t3=0:Ts3:(n3-1)*Ts3 ;
+Fs = fsRRI1Vaikkun ;Ts = 1/Fs;  % sampling frequency for all RRI are same
+n1=length(xRRI1_Vaikkun);n2=length(xRRI2_Vaikkun);n3=length(xRRI3_Vaikkun);  numRRI = 3;
+t1=0:Ts:(n1-1)*Ts ; t2=0:Ts:(n2-1)*Ts ; t3=0:Ts:(n3-1)*Ts ;
 windows = [50 150];
 
 figure(1);
 subplot(3,1,1);
-plot(t1,xRRI,'b','LineWidth',2);xlabel('Time [s]');ylabel('RRI [mV]');title('RRI of Trial 1 (Normal)'); grid on; grid minor; legend('Normal'); set(gca,'FontSize',18)
+plot(t1,xRRI1_Vaikkun,'b','LineWidth',2);xlabel('Time [s]');ylabel('RRI [mV]');title('RRI of Trial 1 (Normal)'); grid on; grid minor; legend('Normal'); set(gca,'FontSize',18)
 subplot(3,1,2);
-plot(t2,xRRI2,'r','LineWidth',2);xlabel('Time [s]');ylabel('RRI [mV]');title('RRI of Trial 2 (Fast)'); grid on; grid minor; legend('Fast'); set(gca,'FontSize',18)
+plot(t2,xRRI2_Vaikkun,'r','LineWidth',2);xlabel('Time [s]');ylabel('RRI [mV]');title('RRI of Trial 2 (Fast)'); grid on; grid minor; legend('Fast'); set(gca,'FontSize',18)
 subplot(3,1,3);
-plot(t3,xRRI3,'g','LineWidth',2);xlabel('Time [s]');ylabel('RRI [mV]');title('RRI of Trial 3 (Slow)'); grid on; grid minor; legend('Slow'); set(gca,'FontSize',18)
-speed = ['Normal' 'Fast' 'Slow']
-RRIsignals = {detrend(xRRI-mean(xRRI)), detrend(xRRI2 - mean(xRRI2)) , detrend(xRRI3 - mean(xRRI3))};
+plot(t3,xRRI3_Vaikkun,'g','LineWidth',2);xlabel('Time [s]');ylabel('RRI [mV]');title('RRI of Trial 3 (Slow)'); grid on; grid minor; legend('Slow'); set(gca,'FontSize',18)
+speed = ['Normal' 'Fast' 'Slow'];
+%%
+RRIsignals = {detrend(xRRI1_Vaikkun-mean(xRRI1_Vaikkun)), detrend(xRRI2_Vaikkun - mean(xRRI2_Vaikkun)) , detrend(xRRI3_Vaikkun - mean(xRRI3_Vaikkun))};
 PSDStandard = cell(numRRI,1);
 nSamples = [n1 n2 n3]; nFft=2048; colors = ['b','g','r'];
 figure(2);
@@ -60,5 +60,19 @@ for i = 1: numRRI
     legend('Original Periodogram','AR(2)','AR(5)','AR(8)','AR(11)')
 end
 
-    
+figure(5);
+K = cell(numRRI,1);pacf = cell(numRRI,1);
+for i = 1:numRRI
+    [arcoefs,E,K{i}] = aryule(RRIsignals{i},20);
+    pacf{i}=-K{i};
+    stem(pacf{i},'filled',colors(i)); hold on;
+end
+xlabel('lag');ylabel('Partial ACF'); title('Partial Autocorrelation Sequence');xlim([1 15]);
+uconf = 0.2;
+lconf = -uconf; hold on;
+plot([1 15],[1 1]'*[lconf uconf],'r--');grid on; grid minor;
+legend('PACF (Normal Breathing)','PACF (Fast Breathing)','PACF (Slow Breathing)')
+set(gca,'FontSize',18)
+
+
 

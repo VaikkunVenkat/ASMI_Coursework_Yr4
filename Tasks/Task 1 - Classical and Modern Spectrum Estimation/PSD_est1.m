@@ -10,24 +10,45 @@ Z   = sin(2*pi*fsig*X);
 Z_dirac = [1, zeros(1,L-1)];
 
 % Compute PSD from FFT
+% sine
 fourier_image  = fftshift(fft(Z,Lfft)/Lfft);
 PSDfromFFT     = abs(fourier_image).^2;
 freq           = -Fsx/2:dfx:Fsx/2-dfx; % Frequency axis
+% dirac
+fourier_image_dirac = fftshift(fft(Z_dirac,Lfft)/Lfft);
+PSDfromFFT_dirac = abs(fourier_image_dirac).^2;
+
 % Compute PSD from Autocorrelation
+% Sine
 Rxx = xcorr(Z,'biased');
 lag = (-(L-1):1:(L-1))*dx;
 PSDfromRxx = abs(fftshift(fft(Rxx,Lfft)/Lfft));
+
+%Dirac
+Rxx_dirac = xcorr(Z_dirac , 'biased');
+PSDfromRXX_dirac = abs(fftshift(fft(Rxx_dirac,Lfft)/Lfft));
+
 % Parseval sums
 fprintf('\nParseval sums : \n\n');
 fprintf('Spatial sum = %f\n', sum(X(:).^2));
 fprintf('Frequency sum (from FFT) = %f\n', sum(PSDfromFFT(:))*Lfft);
 fprintf('Frequency sum (from ACF) = %f\n', sum(PSDfromRxx(:))*Lfft);
 % Plots
-figure;
-subplot(3,1,1); plot(X,Z,'-b'); title('Signal sin(2\pi10n)'); xlabel('Time[s]');ylabel('Amplitude') ; grid on;
-subplot(3,1,2); plot(lag,Rxx,'-r'); title('Autocorrelation of sin(2\pi10n)');xlabel('lag');ylabel('r(k)') ; grid on;
-subplot(3,1,3);
-plot(freq,PSDfromFFT,'r'); title('PSD based on FFT'); hold on;
-plot(freq, PSDfromRxx, 'b'); title('PSD based on autocorrelation');
+figure(1);
+subplot(2,1,1); plot(lag,Rxx,'-r'); title('Autocorrelation of sin(2\pi10n)');xlabel('lag');ylabel('r(k)') ; grid on;
+set(gca,'FontSize',18)
+subplot(2,1,2);
+plot(freq,10*log10(PSDfromFFT),'r'); title('PSD based on FFT'); hold on;
+plot(freq, 10*log10(PSDfromRxx), 'b'); title('PSD based on autocorrelation');
 legend('PSD based on FFT','PSD based on autocorrelation'); hold off;
-xlabel('Frequency [Hz]');ylabel('|P(\omega)|');grid on;
+xlabel('Frequency [Hz]');ylabel('|P(\omega)| [dB]');grid on;
+set(gca,'FontSize',18)
+figure(2);
+subplot(2,1,1); plot(lag,Rxx_dirac,'-r'); title('Autocorrelation of \delta(n)');xlabel('lag');ylabel('r_{\delta}(k)') ; grid on;
+set(gca,'FontSize',18)
+subplot(2,1,2);
+plot(freq,10*log10(PSDfromFFT_dirac),'r'); title('PSD based on FFT'); hold on;
+plot(freq, 10*log10(PSDfromRXX_dirac), 'b'); title('PSD based on autocorrelation');
+legend('PSD based on FFT','PSD based on autocorrelation'); hold off;
+xlabel('Frequency [Hz]');ylabel('|P(\omega)| [dB]');grid on;
+set(gca,'FontSize',18)

@@ -1,4 +1,4 @@
-load PCR/PCAPCR
+load /PCAPCR
 % Determine Singular Values of X and X_noise 
 S_X= svd(X);
 S_Xnoise = svd(Xnoise);
@@ -79,7 +79,7 @@ k = 3;
 Xtest_tilde = U_Xtest(:,1:k)*S_Xtest(1:k,1:k)*V_Xtest(:,1:k)';
 Yhat_OLS = Xtest * Bhat_OLS ; Yhat_PCR = Xtest_tilde * Bhat_PCR;
 error_OLS = Y - Yhat_OLS ; error_PCR = Y - Yhat_PCR;
-mseOLS = sum(sum((error_OLS).^2))/numel(YPCR); msePCR = sum(sum((error_PCR).^2))/numel(YPCR);  
+mseOLS = sum(sum((error_OLS).^2))/numel(Yhat_OLS); msePCR = sum(sum((error_PCR).^2))/numel(Yhat_PCR);  
 figure(1);
 subplot(2,2,1);
 plot(mean(error_OLS,2),'b','LineWidth',2);grid on; grid minor;xlabel('Time Index [n]');ylabel('Error');

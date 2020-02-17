@@ -7,10 +7,10 @@ zeromeanDetrendZurich = detrend(ZurichNumber - mean(ZurichNumber));
 ZurichLog = log(ZurichNumber+eps) - mean(log(ZurichNumber+eps));
 figure(1);
 subplot(1,2,1);
-plot(Year,ZurichNumber ,'g');
+plot(Year,ZurichNumber ,'g','LineWidth',2);
 hold on;
-plot(Year,zeromeanDetrendZurich,'b');
-plot(Year, ZurichLog, 'r' )
+plot(Year,zeromeanDetrendZurich,'b','LineWidth',2);
+plot(Year, ZurichLog, 'r','LineWidth',2);
 legend('original','zero-mean-detrend' , 'log');
 xlabel('Year');
 ylabel('Zurich Number'); title('Sunspot Plots');
@@ -22,20 +22,20 @@ set(gca,'FontSize',20)
 [pLog,fLog] = periodogram(ZurichLog , hanning(N) , [] , 1);
 
 subplot(1,2,2);
-plot(fOriginal,10*log10(pOriginal),'g');hold on;
-plot(fZeroMean,10*log10(pZeroMeanDetrend),'b');
-plot(fLog,10*log10(pLog) ,'r');
+plot(fOriginal,10*log10(pOriginal),'g','LineWidth',2);hold on;
+plot(fZeroMean,10*log10(pZeroMeanDetrend),'b','LineWidth',1);
+plot(fLog,10*log10(pLog) ,'r','LineWidth',2);
 legend('original','zero-mean-detrend','log');
 xlabel('Cycles/Year')
 ylabel('dB / (Cycles/Year)')
 title('Periodogram of Relative Sunspot Number Data')
-set(gca,'FontSize',18)
+set(gca,'FontSize',20); grid on; grid minor;
 
 %% Periodogram Based estimation of EEG
 % 96000 samples, fs = 1200Hz, duration = 80s. Determine X, the rate at
 % which the patient was flashed with the visual stimulus using spectral
 % estimation
-load EEG_Data/EEG_Data_Assignment1
+load Data/EEG_Data/EEG_Data_Assignment1
 dt=1/fs; N=length(POz); samplesPerHertz = 5; Nfft = fs*samplesPerHertz; nOverlap = 0;
 POz_zeroMean = POz - mean(POz);
 t = 0:dt:(N-1)*dt;
@@ -59,6 +59,9 @@ for i = 1:length(windows)
     [PeriodogramWelch(:,i),frequencyWelch(:,i)] = pwelch(POz_zeroMean, bartlett(windowSize), nOverlap, Nfft, fs);
 end
 
+welch = PeriodogramWelch(:,1);
+welch = welch(1:(end-60));
+variance_standard = (var(pxx));variance_average = var(welch);
 figure(3);
 plot(frequencyWelch(:,1),10*log10(PeriodogramWelch(:,1)), 'g' , 'LineWidth',2);
 hold on;

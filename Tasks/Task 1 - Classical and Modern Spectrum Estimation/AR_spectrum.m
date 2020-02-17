@@ -12,14 +12,28 @@ set(gca,'FontSize',18)
 
 figure(2);
 [H,F] = freqz(1,a,[],1);
-orders = [2 4 11];
+orders = [2 5 20];
+
 for i = 1:length(orders)
     [Pxx,F_yulear] = pyulear(x,orders(i),1024,1); hold on;
     plot(F_yulear,10*log10(Pxx),'LineWidth',2);
 end
 plot(F,20*log10(abs(H)),'LineWidth',2); xlabel('Normalized Frequency (Hz)'); ylabel('PSD (dB/Hz)');title('Actual and Estimated PSD of AR(4) process, N = ' + string(N));
-grid on ; grid minor; legend('AR(2)','AR(4)','AR(10)','Theoretical');
+grid on ; grid minor; legend('AR(2)','AR(5)','AR(18)','Theoretical');
 set(gca,'FontSize',18)
+
+figure(3);
+[arcoefs,E,K] = aryule(x,20);
+pacf=-K;
+stem(pacf,'filled','k');
+xlabel('lag');ylabel('Partial ACF'); title('Partial Autocorrelation Sequence');xlim([1 15]);
+uconf = 0.2;
+lconf = -uconf; hold on;
+plot([1 15],[1 1]'*[lconf uconf],'r--');grid on; grid minor;
+legend('PACF of AR(4) process')
+set(gca,'FontSize',18)
+
+
 
 %%
 figure(3);

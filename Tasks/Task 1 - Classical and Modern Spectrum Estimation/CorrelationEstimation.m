@@ -1,14 +1,14 @@
 %% Correlogram part a)
 
 %generate different signals
-fsamp = 25600;
+fsamp = 25600;tsamp=1/fsamp;
 fsig = 1000; % sampling frequency
-nsamp = 128;
+nsamp = 128; t= 0 : tsamp : (nsamp-1)*tsamp;
 Lfft = 2^nextpow2(nsamp);
 dfx  = 1/(Lfft*tsamp);
 WGN = randn(nsamp,1);    %noise
-noisySine   = sinegen(fsamp,fsig,nsamp) + WGN'; %Noise Sine
-windowLength = 10;
+noisySine   =  sin(2*pi*fsig*t) + WGN'; %Noise Sine
+windowLength = 5;
 filterCoeff = ones(1, windowLength)/windowLength;
 filteredNoise = filter(filterCoeff,1 , WGN);    %Filtered WGN
 %plot different signals
@@ -57,10 +57,11 @@ end
 %%
 % Use your code from the previous section (only the biased ACF estimator) to generate the PSD estimate of several [5]
 % realisations of a 2 sinewaves corrupted with noise and plot them
-fsig1 = 100; fsig2 = 200; numRealisations = 100; fsamp = 500; nsamp=128;
+fsig1 = 240; fsig2 = 250; numRealisations = 100; fsamp = 25600; nsamp=128;
+t = 0 : 1/fsamp : (nsamp-1)*1/fsamp;
 randomProcess = [];BiasedACF_realisation = [];BiasedPSD_realisation = [];
 for i = 1:numRealisations
-    randomProcess(i,:) = sinegen(fsamp,fsig1,nsamp) + sinegen(fsamp,fsig2,nsamp) + randn(1,nsamp) ;
+    randomProcess(i,:) = sin(2*pi*fsig1*t) + sin(2*pi*fsig2*t) + randn(1,nsamp) ;
     BiasedACF_realisation(i,:) = xcorr(randomProcess(i,:),'unbiased');
     BiasedPSD_realisation(i,:) = abs(fftshift(fft(BiasedACF_realisation(i,:),Lfft)/Lfft));
 end
@@ -80,7 +81,7 @@ for i = 1:numRealisations
     plot(freq,BiasedPSD_realisation(i,:),'b','LineWidth',1); hold on;
 end
 plot(freq,AveragePSD,'r','LineWidth',2); 
-grid on; grid minor;xlabel('Frequency [Hz]');ylabel('$$\hat{P}_{c}(\omega)$$','Interpreter','LaTex');title('PSD of 100 realisations of sin(2\pi100/25600n) + sin(2\pi200/25600n) + w(n)');
+grid on; grid minor;xlabel('Frequency [Hz]');ylabel('$$\hat{P}_{c}(\omega)$$','Interpreter','LaTex');title('PSD of 100 realisations of sin(2\pi100/600n) + sin(2\pi200/600n) + w(n)');
 set(gca,'FontSize',18);
 subplot(2,1,2);
 plot(freq,stdPSD,'b','LineWidth',2); 
@@ -93,7 +94,7 @@ for i = 1:numRealisations
     plot(freq,10*log10(BiasedPSD_realisation(i,:)),'k','LineWidth',1); hold on;
 end
 plot(freq,10*log10(AveragePSD),'m','LineWidth',2); 
-grid on; grid minor;xlabel('Frequency [Hz]');ylabel('$$\hat{P}_{c}(\omega), [dB]$$','Interpreter','LaTex');title('PSD (in DB) of 100 realisations of sin(2\pi100/25600n) + sin(2\pi200/25600n) + w(n)');
+grid on; grid minor;xlabel('Frequency [Hz]');ylabel('$$\hat{P}_{c}(\omega), [dB]$$','Interpreter','LaTex');title('PSD (in DB) of 100 realisations of sin(2\pi240/600n) + sin(2\pi250/600n) + w(n)');
 set(gca,'FontSize',18);
 subplot(2,1,2);
 plot(freq,stdPSD,'g','LineWidth',2); 
@@ -101,17 +102,17 @@ grid on; grid minor;xlabel('Frequency [Hz]');ylabel('$$\hat{\sigma}_{C}(\omega)$
 set(gca,'FontSize',18);
 %% Periodogram with Frequency Resolution
 clear all; clc; close all;
-numPoints = [20 30 50];colors = ['r','b','g'];
+numPoints = [20 90 140];colors = ['r','b','g'];
 for i = 1:length(numPoints)
     n = 0:numPoints(i);
     noise = 0.2/sqrt(2)*(randn(size(n))+1j*randn(size(n)));
-    x = exp(1j*2*pi*0.3*n)+exp(1j*2*pi*0.32*n) + noise;
+    x = exp(1j*2*pi*0.3*n)+2.5*exp(1j*2*pi*0.32*n) + noise;
     subplot(length(numPoints),1,i);
     [pxx,w] = periodogram(x,hamming(length(x)));
     plot(w/(2*pi) , 10*log10(pxx),colors(i),'LineWidth',1);
     xlabel('Normalized Frequency (x \pi rad/sample)');
     ylabel('P(\omega) [dB]'); grid on; grid minor;
-    title('Periodogram with N = ' + string(numPoints(i)) + ' Points');
+    title('x[n] = e^{2\pi0.3n} + 2.5e^{2\pi0.32n} Periodogram with N = ' + string(numPoints(i)) + ' Points');
     set(gca,'FontSize',18);
 end
 
