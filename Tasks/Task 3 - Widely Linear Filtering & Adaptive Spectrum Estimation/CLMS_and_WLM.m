@@ -168,6 +168,13 @@ end
 %%
 clear all; clc; close all;
 
+% Define three-phase Balanced Voltages
+f0 = 50;    % Nominal UK 3-phase frequency
+fs = 1000;  % Sampling Frequency
+V = 1;      % Peak Voltage of 3 phases
+delta_B = 0;    % zero phase-B distortion
+delta_C = 0;    % zero phase-C distortion
+phi = 0;        % zero phase
 
 
 
