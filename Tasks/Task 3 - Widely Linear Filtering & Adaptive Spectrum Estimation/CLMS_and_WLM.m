@@ -170,12 +170,155 @@ clear all; clc; close all;
 
 % Define three-phase Balanced Voltages
 f0 = 50;    % Nominal UK 3-phase frequency
-fs = 1000;  % Sampling Frequency
+fs = 10000;  % Sampling Frequency
 V = 1;      % Peak Voltage of 3 phases
 delta_B = 0;    % zero phase-B distortion
 delta_C = 0;    % zero phase-C distortion
 phi = 0;        % zero phase
+N = 500;
+Va = cosinegen(fs,f0,N,V,phi,0);
+Vb = cosinegen(fs,f0,N,V,phi,delta_B-2*pi/3);
+Vc = cosinegen(fs,f0,N,V,phi,delta_C + 2*pi/3);
+t = 0:(1/fs):(N-1)*(1/fs);
 
+%Plot balanced three phase system
+figure;
+plot(t,Va,'b','LineWidth',2);hold on;
+plot(t,Vb,'g','LineWidth',2);
+plot(t,Vc,'r','LineWidth',2);
+xlabel('Time [s]');ylabel('Ampltide');title('Balanced 3-phase power system');legend('v_a(n)','v_b(n)','v_c(n)');
+grid on; grid minor;set(gca,'FontSize',18);
+
+% Collate balanced three phase set and transform to alpha-beta voltages
+signalSet = [Va;Vb;Vc];
+Transform = clarkeBalanced(signalSet,N);
+V_alpha = Transform(2,:);
+V_beta = Transform(3,:);
+
+% acquire complex voltage of balanced system
+v_n_balanced = complex(V_alpha , V_beta);
+[balanced_quotient, balanced_coefficient] = circularity_calculation(v_n_balanced');
+% plot circularity distribution of balanced three phase system
+figure;
+plot(v_n_balanced,'r*');xlabel('v_{\alpha}(n)');ylabel('v_{\beta}(n)');
+title('Circularity Distribution of Balanced 3-Phase System'); grid on; grid minor;
+legend('\eta = ' + string(round(balanced_coefficient,2)));
+set(gca,'FontSize',18);
+
+% obtain non-balanced 3 phase systems - Amplitude
+Ampltitudes = [1,0.8,1.2 ; 0.7,1,1.1 ; 1.3,1.2,1.1; 0.8,1,1.2];
+phaseSet = [0 0];
+numCombinations = 4;
+v_n_magUnbalanced = complex(zeros(numCombinations,N));
+figure;
+C_amp = zeros(N,1);
+for i = 1:numCombinations
+    ampSet = Ampltitudes(i,:);
+    v_n_magUnbalanced(i,:) = clarke(ampSet,phaseSet,f0,fs,N,phi);
+    [Q,C_amp(i,1)] = circularity_calculation(v_n_magUnbalanced(i,:)');
+    plot(v_n_magUnbalanced(i,:),'*');hold on;
+end
+xlabel('v_{\alpha}(n)');ylabel('v_{\beta}(n)');title('Non-Balanced 3-phase circularity distribution: Amplitude');
+grid on; grid minor; set(gca,'FontSize',18); legend({'V = [1,0.8,1.2]','V = [0.7,1,1.1]','V = [1.3,1.2,1.1]','V = [0.8,1,1.2]'},'FontSize',12);
+
+% obtain non-balanced 3 phase systems - phase
+Amplitudes = ones(numCombinations,1);
+DistortionSet = pi*[0.1,0.2;-0.3,+0.3;0.5,-0.5;+0.15,-0.2];
+v_n_phaseUnbalanced = complex(zeros(numCombinations,N));
+figure;
+C_phase = zeros(N,1);
+for i = 1:numCombinations
+    delta = DistortionSet(i,:);
+    v_n_phaseUnbalanced(i,:) = clarke(Amplitudes,delta,f0,fs,N,phi);
+    [Q,C_phase(i,1)] = circularity_calculation(v_n_phaseUnbalanced(i,:)');
+    plot(v_n_phaseUnbalanced(i,:),'*');hold on;
+end
+xlabel('v_{\alpha}(n)');ylabel('v_{\beta}(n)');title('Non-Balanced 3-phase circularity distribution: Phase');
+grid on; grid minor; set(gca,'FontSize',18); legend({'\Delta = \pi[0.1,0.2]','\Delta = \pi[-0.3,+0.3]','\Delta = \pi[0.5,-0.5]','\Delta = \pi[+0.15,-0.2]'},'FontSize',12);
+
+% Estimate Frequency of alpha beta voltages using CLMS & ACLMS
+% BALANCED 3-PHASE
+
+mu = 0.01;
+order = 1;
+[balanced_quot, balanced_coeff] = circularity_calculation(v_n_balanced');
+input = [0; v_n_balanced(1,1:end-1)'];
+
+[hCLMS, yHatCLMS,eCLMS] = CLMS(v_n_balanced', input, mu, order);
+[hAugCLMS, gAugCLMS, yHatAugCLMS,eAug] = ACLMS(v_n_balanced', input, mu, order);
+
+fHat = zeros(1,N);
+fHatAug = zeros(1,N);
+for i=1:N
+    fHat(i) = (fs/(2*pi))*atan(sqrt(imag(hCLMS(i)).^2-abs(0).^2)/real(hCLMS(i)));
+    fHatAug(i) = (fs/(2*pi))*atan(sqrt(imag(hAugCLMS(i)).^2-abs(gAugCLMS(i)).^2)/real(hAugCLMS(i)));
+end
+
+figure 
+hold on
+plot(fHat,'Linewidth',2)
+plot(abs(fHatAug),'Linewidth',2)
+xlabel('n')
+ylabel('Frequency (Hz)')
+set(gca, 'Fontsize', 20)
+legend('CLMS','ACLMS')
+title(['Balanced System'])
+grid on
+
+% Unbalanced: magnitude
+input = [0 ; v_n_magUnbalanced(1,1:end-1)'];
+
+[hCLMS, yHatCLMS,eCLMS] = CLMS(v_n_magUnbalanced(2,:)', input, mu, order);
+[hAugCLMS, gAugCLMS, yHatAugCLMS, eAugCLMS] = ACLMS(v_n_magUnbalanced(2,:)', input, mu, order);
+
+fHatCLMS = zeros(1,N);
+fHatAugCLMS = zeros(1,N);
+for i=1:N
+    fHatCLMS(i) = (fs/(2*pi))*atan(sqrt(imag(hCLMS(i)).^2-abs(0).^2)/real(hCLMS(i)));
+    fHatAugCLMS(i) = (fs/(2*pi))*atan(sqrt(imag(hAugCLMS(i)).^2-abs(gAugCLMS(i)).^2)/real(hAugCLMS(i)));
+end
+
+CLMS_finalAverage = mean(fHatCLMS(300:end));
+
+figure 
+hold on
+plot(fHatCLMS,'Linewidth',2)
+plot(abs(fHatAug),'Linewidth',2)
+plot([1 500], [CLMS_finalAverage CLMS_finalAverage],'r-');
+xlabel('n')
+ylabel('Frequency (Hz)')
+set(gca, 'Fontsize', 18)
+legend('CLMS','ACLMS','CLMS Average = ' + string(round(CLMS_finalAverage,2)));
+title(['Balanced System'])
+grid on
+
+% unbalanced: phase
+
+input = [0;v_n_phaseUnbalanced(1,1:end-1)'];
+
+[hCLMS, yHatCLMS,eCLMS] = CLMS(v_n_phaseUnbalanced(2,:)', input, mu, order);
+[hAugCLMS, gAugCLMS, yHatAugCLMS, eAugCLMS] = ACLMS(v_n_phaseUnbalanced(2,:)', input, mu, order);
+
+fHatCLMS = zeros(1,N);
+fHatAugCLMS = zeros(1,N);
+for i=1:N
+    fHatCLMS(i) = (fs/(2*pi))*atan(sqrt(imag(hCLMS(i)).^2-abs(0).^2)/real(hCLMS(i)));
+    fHatAugCLMS(i) = (fs/(2*pi))*atan(sqrt(imag(hAugCLMS(i)).^2-abs(gAugCLMS(i)).^2)/real(hAugCLMS(i)));
+end
+
+CLMS_finalAverage = mean(fHatCLMS(300:end));
+
+figure 
+hold on
+plot(fHatCLMS,'Linewidth',2)
+plot(abs(fHatAug),'Linewidth',2)
+plot([1 500], [CLMS_finalAverage CLMS_finalAverage],'r-');
+xlabel('n')
+ylabel('Frequency (Hz)')
+set(gca, 'Fontsize', 18)
+legend('CLMS','ACLMS','CLMS Average = ' + string(round(CLMS_finalAverage,2)));
+title(['Balanced System'])
+grid on
 
 
 

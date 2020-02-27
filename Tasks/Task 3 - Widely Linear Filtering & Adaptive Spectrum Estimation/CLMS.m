@@ -1,7 +1,7 @@
 function [h_n,y_hat,e_n] = CLMS(y,x,mu,numCoeffs)
     N = length(x);
     y_hat = complex(zeros(1, N));
-    h_n = complex(zeros(numCoeffs, N));
+    h_n = complex(ones(numCoeffs, N));
     e_n = complex(zeros(1, N));
     for i = numCoeffs+1:N
         x_n = x(i:-1:i-numCoeffs+1);

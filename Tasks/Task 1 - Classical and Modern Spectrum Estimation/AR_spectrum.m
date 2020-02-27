@@ -1,12 +1,12 @@
-N=10000;
+N=1000;
 noise = randn(N,1);
 a = [2.76 -3.81 2.65 -0.92];
 a = [1 -a];
 x = filter(1,a,noise);
 x = x(500:end);noise = noise(500:end); N_length = length(x);
 figure(1);
-plot(noise);hold on;plot(x);xlabel('Time Index');ylabel('Amplitude');title('x[n] = 2.76x[n-1]-3.81x[n-2]+2.65x[n-3]-0.92x[n-4] + w[n]');
-legend('N(0,1) noise' , 'AR(4) Process')
+hold on;plot(x,'r','LineWidth',2);plot(noise,'k','LineWidth',2);xlabel('Time Index');ylabel('Amplitude');title('x[n] = 2.76x[n-1]-3.81x[n-2]+2.65x[n-3]-0.92x[n-4] + w[n]');
+legend('AR(4) Process','N(0,1) noise')
 grid on; grid minor;
 set(gca,'FontSize',18)
 
@@ -26,10 +26,10 @@ figure(3);
 [arcoefs,E,K] = aryule(x,20);
 pacf=-K;
 stem(pacf,'filled','k');
-xlabel('lag');ylabel('Partial ACF'); title('Partial Autocorrelation Sequence');xlim([1 15]);
+xlabel('lag');ylabel('Partial ACF'); title('Partial Autocorrelation Sequence');xlim([1 20]);
 uconf = 0.2;
 lconf = -uconf; hold on;
-plot([1 15],[1 1]'*[lconf uconf],'r--');grid on; grid minor;
+plot([1 20],[1 1]'*[lconf uconf],'r--');grid on; grid minor;
 legend('PACF of AR(4) process')
 set(gca,'FontSize',18)
 

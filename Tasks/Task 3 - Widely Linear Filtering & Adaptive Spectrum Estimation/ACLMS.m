@@ -1,7 +1,7 @@
 function [h_n,g_n,xHat,e_n] = ACLMS(y,x,mu,numCoeffs)
     N = length(x);
-    h_n = complex(zeros(numCoeffs,N));
-    g_n = complex(zeros(numCoeffs,N));
+    h_n = complex(ones(numCoeffs,N));
+    g_n = complex(ones(numCoeffs,N));
     e_n = complex(zeros(1,N));
     xHat = complex(zeros(1,N));
     for i=numCoeffs+1:N

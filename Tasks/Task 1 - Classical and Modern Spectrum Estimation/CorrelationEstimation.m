@@ -37,18 +37,18 @@ end
 
 lag = (-(nsamp-1):1:(nsamp-1))*tsamp;
 
-figure(2)
+
 for i = 1:numSignals
-   subplot(3,1,i);
+   figure;
    plot(lag,acfUnbiased{i},'r','LineWidth',2);hold on;plot(lag,acfBiased{i},'b','LineWidth',2);
    xlabel('lag [k]');ylabel('$$\hat{r}(k)$$','Interpreter','LaTex');title('ACF estimate of ' + label(i));
    grid on; grid minor; legend('Unbiased','Biased');set(gca,'FontSize',18);
 end
 
 freq = linspace(-fsamp/2,fsamp/2 , nsamp ); % Frequency axis
-figure(3)
+
 for i = 1:numSignals
-   subplot(3,1,i);
+   figure;
    plot(freq,psdUnbiased{i},'r','LineWidth',2);hold on;plot(freq,psdBiased{i},'b','LineWidth',2);
    xlabel('frequency');ylabel('$$\hat{P}_{c}(\omega)$$','Interpreter','LaTex');title('Correlogram of ' + label(i));
    grid on; grid minor; legend('Unbiased','Biased');set(gca,'FontSize',18);
@@ -57,7 +57,7 @@ end
 %%
 % Use your code from the previous section (only the biased ACF estimator) to generate the PSD estimate of several [5]
 % realisations of a 2 sinewaves corrupted with noise and plot them
-fsig1 = 240; fsig2 = 250; numRealisations = 100; fsamp = 25600; nsamp=128;
+fsig1 = 240; fsig2 = 250; numRealisations = 100; fsamp = 600; nsamp=128;
 t = 0 : 1/fsamp : (nsamp-1)*1/fsamp;
 randomProcess = [];BiasedACF_realisation = [];BiasedPSD_realisation = [];
 for i = 1:numRealisations
@@ -76,27 +76,27 @@ xlabel('Time[s]');ylabel('Amplitude');title('Overlay of 100 realisations of rand
 set(gca,'FontSize',18);
     
 
-figure(2);subplot(2,1,1);freq = linspace(-fsamp/2,fsamp/2 , nsamp );
+figure(2);freq = linspace(-fsamp/2,fsamp/2 ,nsamp);
 for i = 1:numRealisations
     plot(freq,BiasedPSD_realisation(i,:),'b','LineWidth',1); hold on;
 end
 plot(freq,AveragePSD,'r','LineWidth',2); 
 grid on; grid minor;xlabel('Frequency [Hz]');ylabel('$$\hat{P}_{c}(\omega)$$','Interpreter','LaTex');title('PSD of 100 realisations of sin(2\pi100/600n) + sin(2\pi200/600n) + w(n)');
 set(gca,'FontSize',18);
-subplot(2,1,2);
+figure(3);
 plot(freq,stdPSD,'b','LineWidth',2); 
 grid on; grid minor;xlabel('Frequency [Hz]');ylabel('$$\hat{\sigma}_{C}(\omega)$$','Interpreter','LaTex');title('Standard Deviation of Correlogram Estimates of Noisy Sinusoids');
 set(gca,'FontSize',18);
 
 %% dB representation
-figure(3); subplot(2,1,1);
+figure(4);
 for i = 1:numRealisations
     plot(freq,10*log10(BiasedPSD_realisation(i,:)),'k','LineWidth',1); hold on;
 end
 plot(freq,10*log10(AveragePSD),'m','LineWidth',2); 
 grid on; grid minor;xlabel('Frequency [Hz]');ylabel('$$\hat{P}_{c}(\omega), [dB]$$','Interpreter','LaTex');title('PSD (in DB) of 100 realisations of sin(2\pi240/600n) + sin(2\pi250/600n) + w(n)');
 set(gca,'FontSize',18);
-subplot(2,1,2);
+figure(5);
 plot(freq,stdPSD,'g','LineWidth',2); 
 grid on; grid minor;xlabel('Frequency [Hz]');ylabel('$$\hat{\sigma}_{C}(\omega)$$','Interpreter','LaTex');title('Standard Deviation (in dB) of Correlogram Estimates of Noisy Sinusoids');
 set(gca,'FontSize',18);
@@ -107,7 +107,7 @@ for i = 1:length(numPoints)
     n = 0:numPoints(i);
     noise = 0.2/sqrt(2)*(randn(size(n))+1j*randn(size(n)));
     x = exp(1j*2*pi*0.3*n)+2.5*exp(1j*2*pi*0.32*n) + noise;
-    subplot(length(numPoints),1,i);
+    figure;
     [pxx,w] = periodogram(x,hamming(length(x)));
     plot(w/(2*pi) , 10*log10(pxx),colors(i),'LineWidth',1);
     xlabel('Normalized Frequency (x \pi rad/sample)');
@@ -141,9 +141,9 @@ for i = 1:N_points
     
 end
 
-figure(1)
+
 for i = 1:N_points
-    subplot(N_points,1,i);
+    figure;
     for j = 1:numRealisations
         frequency = realisationPSD_lengths{i}{j}(:,2);
         PSD = realisationPSD_lengths{i}{j}(:,1);
@@ -155,9 +155,8 @@ for i = 1:N_points
     hold off;
 end
 
-figure(2)
 for i = 1:N_points
-    subplot(N_points,1,i);
+    figure;
     plot(frequency, stdPSD_lengths{i}, 'r','LineWidth',2);
     set(gca,'xlim',[0.25 0.40]); grid on; grid minor; xlabel('Hz');ylabel('\sigma_{P}(\omega)');
     title('Standard Deviation of Pseudospectrum with N = ' + string(numPoints(i)) + ' Points');set(gca,'FontSize',18);

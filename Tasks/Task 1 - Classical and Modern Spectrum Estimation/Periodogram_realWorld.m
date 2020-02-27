@@ -6,7 +6,6 @@ N = length(ZurichNumber);
 zeromeanDetrendZurich = detrend(ZurichNumber - mean(ZurichNumber));
 ZurichLog = log(ZurichNumber+eps) - mean(log(ZurichNumber+eps));
 figure(1);
-subplot(1,2,1);
 plot(Year,ZurichNumber ,'g','LineWidth',2);
 hold on;
 plot(Year,zeromeanDetrendZurich,'b','LineWidth',2);
@@ -15,13 +14,13 @@ legend('original','zero-mean-detrend' , 'log');
 xlabel('Year');
 ylabel('Zurich Number'); title('Sunspot Plots');
 grid on; grid minor;
-set(gca,'FontSize',20)
+set(gca,'FontSize',18)
 
 [pOriginal,fOriginal] = periodogram(ZurichNumber,hanning(N),[],1);
 [pZeroMeanDetrend,fZeroMean] = periodogram(zeromeanDetrendZurich , hanning(N),[],1);
 [pLog,fLog] = periodogram(ZurichLog , hanning(N) , [] , 1);
 
-subplot(1,2,2);
+figure(2);
 plot(fOriginal,10*log10(pOriginal),'g','LineWidth',2);hold on;
 plot(fZeroMean,10*log10(pZeroMeanDetrend),'b','LineWidth',1);
 plot(fLog,10*log10(pLog) ,'r','LineWidth',2);
@@ -29,7 +28,7 @@ legend('original','zero-mean-detrend','log');
 xlabel('Cycles/Year')
 ylabel('dB / (Cycles/Year)')
 title('Periodogram of Relative Sunspot Number Data')
-set(gca,'FontSize',20); grid on; grid minor;
+set(gca,'FontSize',18); grid on; grid minor;
 
 %% Periodogram Based estimation of EEG
 % 96000 samples, fs = 1200Hz, duration = 80s. Determine X, the rate at
