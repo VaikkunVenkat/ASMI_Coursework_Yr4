@@ -35,20 +35,21 @@ fprintf('Frequency sum (from FFT) = %f\n', sum(PSDfromFFT(:))*Lfft);
 fprintf('Frequency sum (from ACF) = %f\n', sum(PSDfromRxx(:))*Lfft);
 % Plots
 figure(1);
-subplot(2,1,1); plot(lag,Rxx,'-r'); title('Autocorrelation of sin(2\pi10n)');xlabel('lag');ylabel('r(k)') ; grid on;
-set(gca,'FontSize',18)
-subplot(2,1,2);
-plot(freq,10*log10(PSDfromFFT),'r'); title('PSD based on FFT'); hold on;
-plot(freq, 10*log10(PSDfromRxx), 'b'); title('PSD based on autocorrelation');
-legend('PSD based on FFT','PSD based on autocorrelation'); hold off;
-xlabel('Frequency [Hz]');ylabel('|P(\omega)| [dB]');grid on;
-set(gca,'FontSize',18)
+plot(lag,Rxx,'-r'); title('Autocorrelation of Sinusoid');xlabel('lag');ylabel('r(k)') ; grid on;grid minor;
+set(gca,'FontSize',18);
 figure(2);
-subplot(2,1,1); plot(lag,Rxx_dirac,'-r'); title('Autocorrelation of \delta(n)');xlabel('lag');ylabel('r_{\delta}(k)') ; grid on;
-set(gca,'FontSize',18)
-subplot(2,1,2);
-plot(freq,10*log10(PSDfromFFT_dirac),'r'); title('PSD based on FFT'); hold on;
-plot(freq, 10*log10(PSDfromRXX_dirac), 'b'); title('PSD based on autocorrelation');
+plot(freq,10*log10(PSDfromFFT),'r'); hold on;
+plot(freq, 10*log10(PSDfromRxx), 'b'); title('PSD based on FFT and Autocorrelation of Sinusoid');
 legend('PSD based on FFT','PSD based on autocorrelation'); hold off;
-xlabel('Frequency [Hz]');ylabel('|P(\omega)| [dB]');grid on;
-set(gca,'FontSize',18)
+xlabel('Frequency [Hz]');ylabel('Power [dB]');grid on; grid minor;
+set(gca,'FontSize',18);
+figure(3);
+plot(lag,Rxx_dirac,'-r'); title('Autocorrelation of Kronecker Delta');xlabel('lag');ylabel('r_{\delta}(k)') ; 
+grid on; grid minor;
+set(gca,'FontSize',18);
+figure(4);
+plot(freq,10*log10(PSDfromFFT_dirac),'r'); title('PSD based on FFT and Autocorrelation'); hold on;
+plot(freq, 10*log10(PSDfromRXX_dirac), 'b');
+legend('PSD based on FFT','PSD based on autocorrelation'); hold off;
+xlabel('Frequency [Hz]');ylabel('|P(\omega)| [dB]');grid on; grid minor;
+set(gca,'FontSize',18);
