@@ -32,9 +32,33 @@ figure;
 plot(w/pi,10*log10(TheoreticalPSD),'b','LineWidth',2); hold on;
 plot(freq/pi,10*log10(PSDy),'r','LineWidth',2);
 xlabel('Normalised Frequency (\times\pi rad/sample)');ylabel('Power/Frequency (dB/rad/sample)');
-grid on; grid minor; title('Theoretical AR(1) and Empiral PSD of FM signal');
-set(gca,'FontSize',18);legend('Theoretical AR(1)','Empiral');
-
+grid on; grid minor; title('Theoretical AR(1) and Empirical PSD of FM signal');
+set(gca,'FontSize',18);legend('Theoretical AR(1)','Empirical');
+%%
+% Determine Empirical and AR(1) power spectra in each of the three regions
+% Linear Section
+y_flat = y(1:500);
+y_linear = y(501:1000);
+y_quadratic = y(1001:1500);
+y_signals = [y_flat , y_linear , y_quadratic];
+N_section = 500;
+for i =1:3
+    y_section = y_signals(:,i);
+    [a,e] = aryule(y_section,1);
+    [h,w] = freqz(1,a,N_section);
+    TheoreticalPSD = abs(h).^2;
+    FFT_y = fft(y_section);
+    PSDy = (1/(2*pi*N_section)) * abs(FFT_y).^2;
+    freq = 0:(2*pi)/N_section:2*pi-(2*pi)/N_section;
+    EmpPSD = abs(fftshift(FFT_y)).^2;
+    figure;
+    plot(w/pi,10*log10(TheoreticalPSD),'b','LineWidth',2); hold on;
+    plot(freq/pi,10*log10(PSDy),'r','LineWidth',2);
+    xlabel('Normalised Frequency (\times\pi rad/sample)');ylabel('PSD [dB]');
+    grid on; grid minor; title('AR(1) and Empiral PSD FM signal estimate, section ' + string(i));
+    set(gca,'FontSize',18);legend('Theoretical AR(1)','Empirical');
+end    
+%%
 % CLMS based spectrum estimation.
 L = 1024;
 a1_hat = zeros(1,N); H = zeros(L,N);mu=0.6;order=1;

@@ -182,17 +182,16 @@ grid on; grid minor;set(gca,'FontSize',18);
 
 % Collate balanced three phase set and transform to alpha-beta voltages
 
-% signalSet = [Va;Vb;Vc];
-% Transform = clarkeBalanced(signalSet,N);
-% V_alpha = Transform(2,:);
-% V_beta = Transform(3,:);
-% 
-% % acquire complex voltage of balanced system
-% v_n_balanced = complex(V_alpha , V_beta);
-
 ampsBalanced = [1 1 1]; phaseSet = [0 0];
 v_n_balanced = clarke(ampsBalanced,phaseSet,f0,fs,N,phi);
 
+signalSet = [Va;Vb;Vc];
+Transform = clarkeBalanced(signalSet,N);
+V_alpha = Transform(2,:);
+V_beta = Transform(3,:);
+
+% acquire complex voltage of balanced system
+v_n_balanced = complex(V_alpha , V_beta);
 [balanced_quotient, balanced_coefficient] = circularity_calculation(v_n_balanced');
 % plot circularity distribution of balanced three phase system
 figure;
