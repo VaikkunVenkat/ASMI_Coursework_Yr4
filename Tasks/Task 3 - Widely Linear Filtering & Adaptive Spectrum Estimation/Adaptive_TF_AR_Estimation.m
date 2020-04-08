@@ -20,6 +20,11 @@ eta = wgn(1500,1,10*log10(noiseVariance),'complex');
 signal = exp(1i * 2*pi/fs .* phi);
 y = signal + eta;
 
+% Determine circularity distribution
+figure;
+plot(y,'b*');xlabel('y_{r}(n)');ylabel('y_{i}(n)');title('Complex Distribution of FM Signal');
+grid on; grid minor; set(gca,'FontSize',18);
+%%
 % determine AR(1) coefficient and static power spectrum
 [a,e] = aryule(y,1);
 [h,w] = freqz(1,a,N);
@@ -71,12 +76,37 @@ end
 medianH = 50*median(median(H));
 H(H > medianH) = medianH;
 figure;
-surf(1:N, (w/pi)*1000, H, 'LineStyle','none');
-colormap spring;colorbar;
-view(2);
+surf(1:N, (w/pi)*(fs/2), H, 'LineStyle','none');
+colormap winter;colorbar;
+view(2);ylim([0 1000]);
 xlabel('Time Index [n]');
 ylabel('f(n) [Hz]');
 set(gca, 'Fontsize', 18);
 title('Time-Frequency Estimation of noisy FM signal, \mu = ' + string(mu));
 grid on;grid minor;
+%%
+mu = [0.05,0.3,0.6];num_mu=length(mu);
+a1_hat = zeros(num_mu,N);error_n = zeros(num_mu,N);
+
+
+for i =1:length(mu)
+    [a1_hat(i,:),~,error_n(i,:)] = CLMS(y,x,mu(i),order);
+end
+
+figure;plot(abs(a1_hat(3,:)),'r','LineWidth',2); hold on; plot(abs(a1_hat(2,:)),'g','LineWidth',2);
+plot(abs(a1_hat(1,:)),'b','LineWidth',2)
+hold off;
+xlabel('Time Index [n]');ylabel('$$|\hat{a}_1(n)|$$','Interpreter','Latex');title('Trajectory of a_1(n) on FM Signal using CLMS');
+grid on; grid minor;set(gca,'FontSize',18); legend('\mu=0.6','\mu=0.3','\mu=0.05');
+
+figure;
+plot(10*log10(abs(error_n(3,:)).^2),'r','LineWidth',2); hold on; plot(10*log10(abs(error_n(2,:)).^2),'g','LineWidth',2);plot(10*log10(abs(error_n(1,:).^2)),'b','LineWidth',2);
+hold off;
+xlabel('Time Index [n]');ylabel('Error Power [dB]');title('Learning curves for TF estimation of FM signal using CLMS');
+grid on; grid minor;set(gca,'FontSize',18); legend('\mu=0.6','\mu=0.3','\mu=0.05');
+
+figure;plot(conj(a1_hat(3,:)),'r*'); hold on; plot(conj(a1_hat(2,:)),'g*');
+plot(conj(a1_hat(1,:)),'b*')
+hold off;xlabel('Re(a_1(n))');ylabel('Im(a_1(n))');title('Trajectory of a_1(n) on FM Signal using CLMS');
+grid on; grid minor;set(gca,'FontSize',18); legend('\mu=0.6','\mu=0.3','\mu=0.05');
 
